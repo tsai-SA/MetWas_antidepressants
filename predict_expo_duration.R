@@ -76,4 +76,63 @@ roc_auc@y.values[[1]]
 pr_auc <- performance(prob, measure = "aucpr")
 pr_auc@y.values[[1]]
 
+### AUC plot
+labels1 <- one_filtered$one_year_never
+labels2 <- one_to_three_fil$one_to_three_never
+labels3 <- three_to_five_fil$three_to_five_never
+labels4 <- five_fil$longer_five_never
+
+labels1 <- as.numeric(as.character(labels1))
+labels2 <- as.numeric(as.character(labels2))
+labels3 <- as.numeric(as.character(labels3))
+labels4 <- as.numeric(as.character(labels4))
+
+scores_list <- list(pred1, pred2, pred3, pred4)
+labels_list <- list(labels1, labels2, labels3, labels4)
+
+dsids <- c(1, 2, 3, 4)  
+modnames <- c("<1 Year/Never", "1~3 Years/Never", "3~5 Years/Never", ">5 Years/Never")  
+smmdat <- mmdata(scores = scores_list, labels = labels_list, dsids = dsids, modnames = modnames)
+
+mmcurves <- evalmod(smmdat)
+autoplot(mmcurves, "PRC")
+autoplot(mmcurves, "ROC")
+
+auc_values <- auc(mmcurves)
+auc_values <- auc_values[-c(2,4,6,8), ]  #remove PR AUCs
+auc_values$aucs <- as.numeric(as.character(auc_values$aucs))
+
+library(ggplot2)
+library(wesanderson)
+
+roc <- autoplot(mmcurves, "ROC")
+pal <- wes_palette("Zissou1", type = "continuous")
+pal4 <- wes_palette("Zissou1", 4)
+
+roc_plot <- roc + 
+  geom_text(
+    data = auc_values, aes(x = 0.6, y = 0.2 - 0.05 * dsids,
+                           label = paste0(modnames, ": AUC= ", format(round(aucs, 2), 
+                           nsmall = 2))), size = 3, inherit.aes = FALSE
+  ) + 
+  theme(
+    axis.title.x = element_text(size = 20),
+    axis.title.y = element_text(size = 20),
+    axis.text.x  = element_text(size = 15),     # rotate x labels
+    axis.text.y  = element_text(size = 15),
+    legend.title = element_text(size = 20),
+    legend.text  = element_text(size = 15),
+    legend.position = "right",
+    plot.title = element_text(size = 25, face = "bold")
+  ) + 
+  scale_color_manual(values = pal4) +
+  theme_minimal() +
+  geom_line(linewidth = 0.7) +
+  labs(
+    title = "ROC Curves",
+    x = "False Positive Rate",
+    y = "True Positive Rate",
+    color = "Exposure Duration"    
+  ) 
+
 save.image("predict_duration.RData")
