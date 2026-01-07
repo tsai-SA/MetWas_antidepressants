@@ -1,4 +1,20 @@
-ad_baseline_duration <- readRDS("ad_baseline_duration.rds")
+
+ad_dose_episodes_baseline <- readRDS("ad_dose_episodes_baseline.rds")
+
+library(dplyr)
+
+ad_baseline_duration <- ad_dose_episodes_baseline %>%
+  mutate(
+    duration_class = case_when(
+       as.numeric(difftime(baseline_date, issue_date_start, units = "days")) < 365 ~ "less_one",
+       as.numeric(difftime(baseline_date, issue_date_start, units = "days")) >= 365 &  as.numeric(difftime(baseline_date, issue_date_start, units = "days")) <= 1095 ~ "one_to_three",
+       as.numeric(difftime(baseline_date, issue_date_start, units = "days")) > 1095 &  as.numeric(difftime(baseline_date, issue_date_start, units = "days")) <= 1825 ~ "three_to_five",
+       as.numeric(difftime(baseline_date, issue_date_start, units = "days")) > 1825 ~ "longer_than_five",
+      TRUE ~ NA_character_
+    ) 
+  ) %>%
+  filter(episode_status == "Current")
+
 metscore_ad <- readRDS("metscore_ad.rds")
 
 install.packages("pscl")
