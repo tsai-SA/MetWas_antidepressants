@@ -132,6 +132,8 @@ runFGSEA = function(pathways = met.classes, stats = ovca.mets, minSize=3, maxSiz
   
 }
 
+beta_never = main_model_never$Beta
+names(beta_never) = main_model_never$Outcome
 never.fgsea = runFGSEA(pathways = met.classes, stats = beta_never)
 never.fgsea$x = "All"
 never.fgsea$stars = ""
