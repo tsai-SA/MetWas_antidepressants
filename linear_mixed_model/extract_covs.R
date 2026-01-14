@@ -133,5 +133,5 @@ repeat_asse_pheno <- fread("app4844_20251209141336.dataset_phenotype_data.csv") 
 # -----------------------------
 
 #upload file to project space
-saveRDS(age_sex, "age_sex.rds") # you need to save your file first in your session environment
-file_upload <- system('dx upload age_sex.rds', intern = TRUE) # upload file into projects
+saveRDS(repeat_asse_pheno, "repeat_asse_pheno.rds") # you need to save your file first in your session environment
+file_upload <- system('dx upload repeat_asse_pheno', intern = TRUE) # upload file into projects
