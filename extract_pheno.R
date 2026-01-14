@@ -66,9 +66,9 @@ datadict <- data.table::fread(data_dict_file)
 field_schema <- data.table::fread('/mnt/project/Showcase metadata/field.tsv') #For list of met fields
 
 # -----------------------------
-# Step 6: Extract sex, age, assessment centre, spectrometer, BMI info
+# Step 6: Extract sex, age, assessment centre, spectrometer, BMI, GP registration info
 # -----------------------------
-fields_of_interest <- c(21001, 54, 23650, 21003, 31)
+fields_of_interest <- c(21001, 54, 23650, 21003, 31, 42038)
 category_of_interest = NULL
 
 category_fields_extract <- field_schema |>
