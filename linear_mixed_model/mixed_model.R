@@ -27,6 +27,7 @@ longi_t0_t1$spectrometer <- as.factor(longi_t0_t1$spectrometer)
 longi_t0_t1$test_period <- as.factor(longi_t0_t1$test_period)
 longi_t0_t1$test_month <- as.factor(longi_t0_t1$test_month)
 longi_t0_t1$time <- as.factor(longi_t0_t1$time)
+saveRDS(longi_t0_t1, "longi_t0_t1.rds")
 
 test <- lmer(scale(f.20280) ~ age + sex + bmi + spectrometer + test_month + test_period + ad_use_longi*time + (1 | f.eid), data = longi_t0_t1)
 
