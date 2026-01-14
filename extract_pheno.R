@@ -12,6 +12,7 @@ system("pip install pandas==1.3.5")
 
 pkg <- c("data.table", "dplyr", "stringr")   #Basic libraries
 new.pkg <- pkg[!(pkg %in% installed.packages())]
+if(length(new.pkg)) install.packages(new.pkg, repos="http://cran.rstudio.com")
 
 library(data.table)
 library(dplyr)
