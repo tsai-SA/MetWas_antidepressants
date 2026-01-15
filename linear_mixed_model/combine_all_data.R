@@ -1,11 +1,7 @@
 
-repeat_asse_pheno <- rename(repeat_asse_pheno, "f.eid" = "eid")
-saveRDS(repeat_asse_pheno, "repeat_asse_pheno.rds")
-
-met_data_repeat_impt <- met_data_repeat_impt %>%
-  left_join(repeat_asse_pheno, by = "f.eid")
 
 ad_dose_episodes_baseline <- readRDS("ad_dose_episodes_baseline.rds")
+mixed_model_covs <- readRDS("mixed_model_covs.rds")
 
 gp_regis <- rename(gp_regis, f.eid = "eid" )
 gp_regis <- rename(gp_regis, regis_record = "p42038" )
@@ -90,9 +86,31 @@ ad_t0_t1 <- ad_t0_t1 %>%
 
 saveRDS(ad_t0_t1, "ad_t0_t1.rds")     
 
-met_data_repeat_impt <- readRDS("met_data_repeat_impt.rds")
+ad_t0_t1 <- readRDS("ad_t0_t1.rds")
 
-met_data_repeat_impt <- rename(met_data_repeat_impt, "f.eid" = "Participant ID")
+longi_users <- ad_t0_t1 %>% 
+  filter(!is.na(ad_use_longi))
+
+longi_users <- longi_users %>%
+  select(f.eid, ad_use_longi)
+
+met_data_repeat_impt <- readRDS("met_data_repeat_impt.rds")
+met_data_repeat_impt <- rename(met_data_repeat_impt, f.eid = "Participant ID")
+
+met_data_repeat_impt <- left_join(met_data_repeat_impt, longi_users, by = "f.eid")
+colnames(met_data_repeat_impt)
+
+overlap_ids <- as.data.frame(met_data_repeat_impt$f.eid)
+overlap_ids <- rename(overlap_ids, f.eid = "met_data_repeat_impt$f.eid")
+
+
+met_data_baseline <- readRDS("baseline_met_data_final_version.rds")
+met_data_baseline <- rename(met_data_baseline, f.eid = "Participant ID")
+met_data_t0 <- left_join(overlap_ids, met_data_baseline, by = "f.eid")
+
+
+mixed_model_covs <- readRDS("mixed_model_covs.rds")
+
 met_data_repeat_impt$time <- "1"
 mixed_model_covs <- rename(mixed_model_covs, f.eid = eid)
 met_data_repeat_impt <- met_data_repeat_impt %>% left_join(mixed_model_covs %>% select(f.eid, bmi_t1), by = "f.eid")
@@ -112,42 +130,28 @@ met_data_repeat_impt <- met_data_repeat_impt %>%
     .cols = 2:252
   )
 
-
-
-
-baseline_met_data <- readRDS("met_data.rds")
-colnames(baseline_met_data)
-
-baseline_met_data <- baseline_met_data %>%
+met_data_t0 <- met_data_t0 %>%
   select(1:254)
 
 # Remove .0.0 from all column names
-baseline_met_data <- baseline_met_data %>%
+met_data_t0 <- met_data_t0 %>%
   rename_with(~ gsub("\\.0\\.0$", "", .x))
 
-baseline_met_data <- rename(baseline_met_data, "f.eid" = "Participant ID")
-baseline_met_data <- rename(baseline_met_data, "age" = "Age")
-baseline_met_data <- rename(baseline_met_data, "sex" = "Sex")
-baseline_met_data <- baseline_met_data %>% left_join(mixed_model_covs %>% select(f.eid, bmi_t0), by = "f.eid")
-baseline_met_data <- baseline_met_data %>% left_join(mixed_model_covs %>% select(f.eid, spectro_t0), by = "f.eid")
-baseline_met_data <- baseline_met_data %>% left_join(mixed_model_covs %>% select(f.eid, test_period_t0), by = "f.eid")
-baseline_met_data <- baseline_met_data %>% left_join(mixed_model_covs %>% select(f.eid, test_month_t0), by = "f.eid")
-baseline_met_data <- rename(baseline_met_data, "bmi" = "bmi_t0")
-baseline_met_data <- rename(baseline_met_data, "spectrometer" = "spectro_t0")
-baseline_met_data <- rename(baseline_met_data, "test_period" = "test_period_t0")
-baseline_met_data <- rename(baseline_met_data, "test_month" = "test_month_t0")
-baseline_met_data$time <- "0"
-
-longi_users <- ad_t0_t1 %>% 
-  filter(!is.na(ad_use_longi))
-
-longi_users <- longi_users %>%
-  filter(ad_use_longi != "Current")
-
-longi_users <- longi_users %>%
-  select(f.eid, ad_use_longi)
-
-longi_users_t0 <- left_join(longi_users, baseline_met_data, by = "f.eid")
-longi_users_t1 <- left_join(longi_users, met_data_repeat_impt, by = "f.eid")
+met_data_t0 <- rename(met_data_t0, "f.eid" = "Participant ID")
+met_data_t0 <- rename(met_data_t0, "age" = "Age")
+met_data_t0 <- rename(met_data_t0, "sex" = "Sex")
+met_data_t0 <- met_data_t0 %>% left_join(mixed_model_covs %>% select(f.eid, bmi_t0), by = "f.eid")
+met_data_t0 <- met_data_t0 %>% left_join(mixed_model_covs %>% select(f.eid, spectro_t0), by = "f.eid")
+met_data_t0 <- met_data_t0 %>% left_join(mixed_model_covs %>% select(f.eid, test_period_t0), by = "f.eid")
+met_data_t0 <- met_data_t0 %>% left_join(mixed_model_covs %>% select(f.eid, test_month_t0), by = "f.eid")
+met_data_t0 <- rename(met_data_t0, "bmi" = "bmi_t0")
+met_data_t0 <- rename(met_data_t0, "spectrometer" = "spectro_t0")
+met_data_t0 <- rename(met_data_t0, "test_period" = "test_period_t0")
+met_data_t0 <- rename(met_data_t0, "test_month" = "test_month_t0")
+met_data_t0$time <- "0"
+met_data_t0 <- left_join(met_data_t0, longi_users, by = "f.eid")
 
 longi_t0_t1 <- bind_rows(longi_users_t0, longi_users_t1)
+
+met_data_t0_t1 <- met_data_t0_t1 %>%
+  filter(ad_use_longi != "Current") #keep only controls vs new users 
