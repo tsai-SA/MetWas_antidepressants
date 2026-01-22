@@ -1,39 +1,40 @@
+
 library(pbapply)
 library(lmerTest)
 
+new_never <- met_ad_t0_t1 %>%
+  filter(ad_use_longi %in% c("New", "Never"))
+  
 
-str(longi_t0_t1)
-
-
-longi_t0_t1 <- longi_t0_t1 %>%
+new_never <- new_never %>%
   mutate(
     across(ad_use_longi, ~ replace(., . == "Never", "0"))
   )
 
-longi_t0_t1 <- longi_t0_t1 %>%
+new_never <- new_never %>%
   mutate(
     across(ad_use_longi, ~ replace(., . == "New", "1"))
   )
 
-class(longi_t0_t1$ad_use_longi)
+class(new_never$ad_use_longi)
 
-longi_t0_t1$ad_use_longi <- as.factor(longi_t0_t1$ad_use_longi)
+new_never$ad_use_longi <- as.factor(new_never$ad_use_longi)
 
 
-str(longi_t0_t1[, 240:260])
+str(new_never[, 240:260])
 
-longi_t0_t1$sex <- as.factor(longi_t0_t1$sex)
-longi_t0_t1$spectrometer <- as.factor(longi_t0_t1$spectrometer)
-longi_t0_t1$test_period <- as.factor(longi_t0_t1$test_period)
-longi_t0_t1$test_month <- as.factor(longi_t0_t1$test_month)
-longi_t0_t1$time <- as.factor(longi_t0_t1$time)
-saveRDS(longi_t0_t1, "longi_t0_t1.rds")
+new_never$sex <- as.factor(new_never$sex)
+new_never$spectrometer <- as.factor(new_never$spectrometer)
+new_never$test_period <- as.factor(new_never$test_period)
+new_never$test_month <- as.factor(new_never$test_month)
+new_never$time <- as.factor(new_never$time)
+saveRDS(new_never, "new_never.rds")
 
-test <- lmer(scale(f.20280) ~ age + sex + bmi + spectrometer + test_month + test_period + ad_use_longi*time + (1 | f.eid), data = longi_t0_t1)
+test <- lmer(scale(f.20280) ~ age + sex + bmi + spectrometer + test_month + test_period + ad_use_longi*time + (1 | f.eid), data = new_never)
 
 base_covariates <- c("age", "sex", "spectrometer", "bmi", "test_month", "test_period")
 interact_cov <- c("time", "ad_use_longi")
-ls.met <- colnames(longi_t0_t1)[3:253]
+ls.met <- colnames(new_never)[3:253]
 
 
 group_interaction <- function(x.met = ls.met, x.predict, x.dat, x.covs = base_covariates) {
@@ -74,4 +75,4 @@ group_interaction <- function(x.met = ls.met, x.predict, x.dat, x.covs = base_co
   return(x.res)
 }
 
-new_vs_never_model <- group_interaction(ls.met, interact_cov, longi_t0_t1, base_covariates)
+new_vs_never_model <- group_interaction(ls.met, interact_cov, new_never, base_covariates)
