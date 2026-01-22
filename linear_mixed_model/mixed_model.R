@@ -20,8 +20,21 @@ class(new_never$ad_use_longi)
 
 new_never$ad_use_longi <- as.factor(new_never$ad_use_longi)
 
+install.packages("tibble")
 
-str(new_never[, 240:260])
+
+library(pbapply)
+library(lmerTest)
+library(dplyr)
+library(readr)
+
+
+
+sig_met_metwas <- readRDS("sig_met_metwas.rds") #sig met from main metwas
+new_never <- readRDS("new_never.rds")
+
+
+str(new_never)
 
 new_never$sex <- as.factor(new_never$sex)
 new_never$spectrometer <- as.factor(new_never$spectrometer)
@@ -34,7 +47,9 @@ test <- lmer(scale(f.20280) ~ age + sex + bmi + spectrometer + test_month + test
 
 base_covariates <- c("age", "sex", "spectrometer", "bmi", "test_month", "test_period")
 interact_cov <- c("time", "ad_use_longi")
-ls.met <- colnames(new_never)[3:253]
+
+sig_met_metwas$FieldID <- paste0("f.", sig_met_metwas$FieldID) 
+ls.met <- sig_met_metwas$FieldID
 
 
 group_interaction <- function(x.met = ls.met, x.predict, x.dat, x.covs = base_covariates) {
@@ -76,3 +91,16 @@ group_interaction <- function(x.met = ls.met, x.predict, x.dat, x.covs = base_co
 }
 
 new_vs_never_model <- group_interaction(ls.met, interact_cov, new_never, base_covariates)
+
+sum(new_vs_never_model$p.fdr < 0.05)
+
+sig <- new_vs_never_model %>% 
+  filter(p < 0.05)
+
+grouping_met_enrich <- readRDS("grouping_met_enrich.rds")
+grouping_met_enrich$FieldID <- paste0("f.", grouping_met_enrich$FieldID) 
+sig <- rename(sig, FieldID = "Outcome") 
+sig <- left_join(sig, grouping_met_enrich, by ="FieldID")
+
+saveRDS(new_vs_never_model, "new_vs_never_model.rds")
+
