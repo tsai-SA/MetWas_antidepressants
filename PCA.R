@@ -1,3 +1,7 @@
+## this PCA is not telling me its associated to outcome variable, 
+#but it is telling me among the sig markers, what is the dominating group
+
+
 install.packages("psych")
 library(psych)
 library(dplyr)
