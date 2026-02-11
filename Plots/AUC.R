@@ -3,7 +3,6 @@ metscore_ad <- readRDS("metscore_ad_v2.rds")
 
 library(readr)
 library(DescTools)
-library(caret)      # For confusion matrix
 library(ROCR)
 library(pscl)
 library(assertthat)
@@ -13,6 +12,7 @@ library(grid)
 
 str(metscore_ad)
 
+hgd()
 
 never_filtered <- metscore_ad %>% filter(!is.na(Current_vs_Never) & !is.na(total.MetS))
 logis_reg_never <- glm(Current_vs_Never ~ scale(total.MetS), family=binomial (link=logit), data = never_filtered)
