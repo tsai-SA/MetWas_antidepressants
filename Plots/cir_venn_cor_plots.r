@@ -7,7 +7,7 @@ library(httpgd)
 library(openxlsx)
 library(wesanderson)
 
-
+setwd("/Users/angelatsaii/Desktop/ukbrap_analyses")
 main_model_never <- readRDS("main_model_never.rds")
 
 ukb_abbre <- read.xlsx("ukb_abbre.xlsx")
@@ -25,6 +25,7 @@ never_sig <- main_model_never %>%
     filter(main_model_never$p.fdr < 0.05)
 
 never_sig$Group <- as.factor(never_sig$Group)
+
 
 # Order data:
 never_sig = never_sig %>% arrange(Group, Beta)
@@ -59,7 +60,7 @@ circle <- ggplot(never_sig, aes(x=as.factor(id), y=Beta, fill=Group)) +       # 
          x = -3.35,  # adjust where to place the sacle labels
          y = c(-0.15, -0.05, 0, 0.05, 0.15) + 0.02,  # push outside the scale lines
          label = c("- 0.15", "- 0.05", "0", "0.05", "0.55"),
-         color = "black", size = 1.8, angle = 0, fontface = "bold", hjust = 0.5) +
+         color = "black", size = 3, angle = 0, fontface = "bold", hjust = 0.5) +
   ylim(-0.2, 0.2) +
   theme_minimal() +
   theme(
@@ -72,7 +73,7 @@ circle <- ggplot(never_sig, aes(x=as.factor(id), y=Beta, fill=Group)) +       # 
     plot.margin = unit(rep(-1,4), "cm") 
   ) +
   coord_polar(clip = "off")  +   
-  geom_text(data=label_data, aes(x=id, y=0.2, label=Shortened.name, hjust=hjust, angle=angle), color="black",alpha=1, size=2, inherit.aes = FALSE ) +
+  geom_text(data=label_data, aes(x=id, y=0.2, label=Shortened.name, hjust=hjust, angle=angle), color="black",alpha=1, size=3, inherit.aes = FALSE ) +
     scale_fill_manual(values = wes_palette("Zissou1", length(unique(never_sig$Group)), type = "continuous")) 
 
 
@@ -100,16 +101,23 @@ full.set1.fdr <- main_model_never %>% filter(p.fdr < 0.05) %>% {.$Metabolite}
 full.set2.fdr <- main_model_past %>% filter(p.fdr < 0.05) %>% {.$Metabolite}
 full.set3.fdr <- main_model_future %>% filter(p.fdr < 0.05) %>% {.$Metabolite}
  
-venn <- ggVennDiagram(list(full.set1.fdr,full.set2.fdr,full.set3.fdr), set_size = 3.5, label = "count", label_alpha=0, label_size = 3.5,
-                category.names = c("Current/Never","Current/Past","Current/Future")) +
-                scale_fill_distiller(palette = "Paired") +
-                scale_x_continuous(expand = expansion(mult = .65))+
-                ggtitle('FDR-sig metabolites per set') + 
-                theme(plot.title = element_text(size = 10, hjust = 0.3), 
-                    legend.text  = element_text(size = 8),   # legend labels
-                    legend.title = element_text(size = 8))    # legend title
+venn <- ggVennDiagram(list(full.set1.fdr,full.set2.fdr,full.set3.fdr), set_size = 4.5, label = "count", label_alpha=0, label_size = 4.5,
+                category.names = c(" "," ","Current/Future")) 
+venn$layers
 
+# Move category labels upward/downward manually
+venn$layers[[3]]$data$Y <- venn$layers[[3]]$data$Y * 1.15
+venn$layers[[3]]$data$X <- venn$layers[[3]]$data$X * 0.85
 
+venn <- venn +
+  scale_fill_distiller(palette = "Paired") +
+  scale_x_continuous(expand = expansion(mult = .15)) +
+  ggtitle("Current/Never   Current/Past") +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(size=13)
+  ) 
+  
 #### correlation plot
 
 setwd("/Users/angelatsaii/Desktop/ukbrap_analyses")
@@ -148,8 +156,8 @@ cor_neverpast <- ggplot(combined_beta, aes(x= never_Beta, y = past_Beta)) +
     theme(legend.text = element_blank(),
           legend.title = element_blank(),
           legend.position = "none",
-          axis.text = element_text(size=9),
-          axis.title = element_text(size=10)) +
+          axis.text = element_text(size=12),
+          axis.title = element_text(size=13)) +
     annotate("text", x = 0.1, y = -0.15, label = "r = 0.99", size = 5)
 
 	
@@ -171,50 +179,38 @@ cor_neverfuture <- ggplot(combined_beta, aes(x= never_Beta, y = future_Beta)) +
         theme(legend.text = element_blank(),
           legend.title = element_blank(),
           legend.position = "none",
-          axis.text = element_text(size=9),
-          axis.title = element_text(size=10)) +
+          axis.text = element_text(size=12),
+          axis.title = element_text(size=13)) +
     annotate("text", x = 0.1, y = -0.15, label = "r = 0.98", size = 5)
 
 cor_neverpast <- cor_neverpast + coord_fixed()
 cor_neverfuture <- cor_neverfuture + coord_fixed()
 cor_plot <- cor_neverpast + cor_neverfuture 
 
-cor_venn <- cor_plot + venn
+design <- c(
+  area(t = 1, l = 1, b = 12, r = 3),  # A
+  area(t = 12, l = 1, b = 14, r = 1),  # B
+    area(t = 12, l = 2, b = 14, r = 2),  # B
+  area(t = 12, l = 3, b = 14, r = 3)   # C
+)
 
-design <- "AAA
-           AAA
-           AAA
-           AAA
-           AAA
-           AAA
-           AAA
-           AAA
-            AAA
-           AAA
-           AAA
-            AAA
-           AAA
-           AAA
-           ###
-           BBC
-           BBC
-           BBC
-            BBC"
+theme_tag <- theme(
+  plot.tag = element_text(face = "bold", size = 15)
+)
+
+circle   <- circle + theme_tag
+cor_neverpast <- cor_neverpast + theme_tag
+cor_neverfuture <- cor_neverfuture + theme_tag
+venn <- venn + theme_tag
 
 
-cor_venn <- cor_venn & theme(plot.tag = element_text(size = 15, face = "bold"))
-circle <- circle + labs(tag = "a") +
-  theme(plot.tag = element_text(size = 15, face = "bold"))
-
-free(circle) + cor_plot + venn +
+circle + cor_neverpast + cor_neverfuture + venn +
   plot_layout(design = design) +
-  plot_annotation(tag_levels = 'a', 
-  theme = theme(plot.tag = element_text(size = 15, face = "bold")))
-
+  plot_annotation(tag_levels = "a")
 
 ggsave(
   "plot.png",
-  width = 14,   # match Word page width
-  height = 8,
+  width = 11,   # match Word page width
+  height = 12,
   dpi = 600
 )
