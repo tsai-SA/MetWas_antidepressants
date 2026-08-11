@@ -103,12 +103,13 @@ a <- ggplot(data = all_fgsea, aes(x = x, y = pathway, fill = NES)) +
 
 main_model_never <- main_model_never %>%
   mutate(subgroup = case_when(
+    Metabolite == "Total Cholesterol Minus HDL-C" ~ "NA",
+    Metabolite == "Remnant Cholesterol (Non-HDL, Non-LDL -Cholesterol)" ~ "NA",
     grepl("VLDL", Metabolite) ~ "VLDL",
     grepl("LDL", Metabolite) ~ "LDL",
     grepl("HDL", Metabolite) ~ "HDL",
     grepl("IDL", Metabolite) ~ "IDL",
     TRUE ~ "NA"
-
   ))
 
 main_model_never_subgroup <- main_model_never %>%
@@ -116,12 +117,13 @@ main_model_never_subgroup <- main_model_never %>%
 
 main_model_past <- main_model_past %>%
   mutate(subgroup = case_when(
+    Metabolite == "Total Cholesterol Minus HDL-C" ~ "NA",
+    Metabolite == "Remnant Cholesterol (Non-HDL, Non-LDL -Cholesterol)" ~ "NA",
     grepl("VLDL", Metabolite) ~ "VLDL",
     grepl("LDL", Metabolite) ~ "LDL",
     grepl("HDL", Metabolite) ~ "HDL",
     grepl("IDL", Metabolite) ~ "IDL",
     TRUE ~ "NA"
-
   ))
 
 main_model_past_subgroup <- main_model_past %>%
@@ -129,12 +131,13 @@ main_model_past_subgroup <- main_model_past %>%
 
 main_model_future <- main_model_future %>%
   mutate(subgroup = case_when(
+    Metabolite == "Total Cholesterol Minus HDL-C" ~ "NA",
+    Metabolite == "Remnant Cholesterol (Non-HDL, Non-LDL -Cholesterol)" ~ "NA",
     grepl("VLDL", Metabolite) ~ "VLDL",
     grepl("LDL", Metabolite) ~ "LDL",
     grepl("HDL", Metabolite) ~ "HDL",
     grepl("IDL", Metabolite) ~ "IDL",
     TRUE ~ "NA"
-
   ))
 
 main_model_future_subgroup <- main_model_future %>%
@@ -222,7 +225,7 @@ combined <- a / b +
   plot_layout(guides = "collect", heights = c(2, 0.6), tag_level = "new") &
   theme(legend.position = "bottom", plot.tag = element_text(size = 13, face = "bold"))
 
-combined <- combined + plot_annotation(tag_levels = list(c("2a", "2b"))) 
+combined <- combined + plot_annotation(tag_levels = list(c("a", "b"))) 
 
 jpeg(
   "all_enrich_plot.jpeg",
